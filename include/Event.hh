@@ -63,17 +63,44 @@ namespace Mikoto {
      * bit wise OR which is supported by integers, for simplicity sake, this structure
      * is not declared as an enum class
      * */
-    enum EventCategory {
+    enum EventCategory : UInt32_T {
         EMPTY_EVENT_CATEGORY            =  BIT_SET(0),
 
-        INPUT_EVENT_CATEGORY            =  BIT_SET(1),
-        APPLICATION_EVENT_CATEGORY      =  BIT_SET(2),
-        KEY_EVENT_CATEGORY              =  BIT_SET(3),
-        MOUSE_EVENT_CATEGORY            =  BIT_SET(4),
-        MOUSE_BUTTON_EVENT_CATEGORY     =  BIT_SET(5),
+        APP_EVENT_CATEGORY              =  BIT_SET(1),
+        INPUT_EVENT_CATEGORY            =  BIT_SET(2),
+        WINDOW_EVENT_CATEGORY           =  BIT_SET(3),
+        KEY_EVENT_CATEGORY              =  BIT_SET(4),
+        MOUSE_EVENT_CATEGORY            =  BIT_SET(5),
+        MOUSE_BUTTON_EVENT_CATEGORY     =  BIT_SET(6),
 
-        EVENT_CATEGORY_COUNT            =  BIT_SET(6),
+        EVENT_CATEGORY_COUNT            =  BIT_SET(7),
     };
+
+    MKT_NODISCARD inline auto GetCategoryFromType(EventType type) -> EventCategory {
+        switch (type) {
+            case EventType::EMPTY_EVENT: return EventCategory::EMPTY_EVENT_CATEGORY;
+
+            case EventType::WINDOW_RESIZE_EVENT:
+            case EventType::WINDOW_CLOSE_EVENT:
+            case EventType::WINDOW_MOVED_EVENT: return EventCategory(WINDOW_EVENT_CATEGORY);
+
+            case EventType::APP_RENDER_EVENT:
+            case EventType::APP_UPDATE_EVENT:
+            case EventType::APP_TICK_EVENT: return EventCategory::APP_EVENT_CATEGORY;
+
+            case EventType::KEY_PRESSED_EVENT:
+            case EventType::KEY_RELEASED_EVENT:
+            case EventType::KEY_CHAR_EVENT: return EventCategory(KEY_EVENT_CATEGORY | INPUT_EVENT_CATEGORY);
+
+            case EventType::MOUSE_BUTTON_PRESSED_EVENT:
+            case EventType::MOUSE_BUTTON_RELEASED_EVENT: return EventCategory(INPUT_EVENT_CATEGORY | MOUSE_EVENT_CATEGORY | MOUSE_BUTTON_EVENT_CATEGORY);
+
+            case EventType::MOUSE_MOVED_EVENT:
+            case EventType::MOUSE_SCROLLED_EVENT: return EventCategory(INPUT_EVENT_CATEGORY | MOUSE_BUTTON_EVENT_CATEGORY);
+
+            default: return EventCategory::EMPTY_EVENT_CATEGORY;
+        }
+    }
 
 
     class Event {
@@ -145,56 +172,6 @@ namespace Mikoto {
     };
 
     /**
-     * This concept ensures type safety determining in for the dispatcher method.
-     * If the event defines the static member function GetStaticType()
-     * (Ideally all events should implement it)
-     * */
-    template<typename EventClassType>
-    concept HasStaticGetType = requires (EventClassType) { EventClassType::GetStaticType(); };
-
-    /**
-     * This a mechanism that handles the distribution and routing of events
-     * to appropriate event handlers. It acts as a central hub or manager
-     * for events and facilitates communication between different parts of our system.
-     *
-     * When it receives an Event it forwards or propagates it to the appropriate
-     * handler (essentially calls the handler with the provided event). If the
-     * Handler function does not want to propagate the Event, it marks it as handled,
-     * that is why the handler returns a boolean that indicates this state.
-     * */
-    class EventDispatcher {
-    public:
-        /**
-         * Alias for event function. The function is supposed to return true if the
-         * event has been handled successfully, false otherwise.
-         * @tparam T type of event, is supposed to be a class type like <code>kT::KeyPressedEvent</code>, etc
-         * */
-        template<typename T>
-        using EventFunc_T = std::function<bool(T&)>;
-
-        explicit EventDispatcher(Event& event)
-            :   m_Event{ event } {}
-
-        template<typename EventClassType>
-            requires HasStaticGetType<EventClassType>
-        MKT_NODISCARD auto Forward(EventFunc_T<EventClassType> func) -> bool {
-            if (m_Event.GetType() == EventClassType::GetStaticType()) {
-                m_Event.m_Handled = func(*(static_cast<EventClassType*>(&m_Event)));
-                return true;
-            }
-
-            return false;
-        }
-
-    private:
-        /**
-         * Using a reference instead of pointer because a pointer
-         * would require to construct an Event which an abstract class
-         * */
-        Event& m_Event;
-    };
-
-    /**
      * Returns the exact string representation of the given EventType enum
      * @returns EventType string representation
      * */
@@ -215,7 +192,7 @@ namespace Mikoto {
             case EventType::APP_TICK_EVENT: return "APP_TICK_EVENT";
 
             // Key Events.
-            // Category [KEYBOARD_EVENT_CATEGORY]
+            // Category [KEY_EVENT_CATEGORY]
             case EventType::KEY_PRESSED_EVENT: return "KEY_PRESSED_EVENT";
             case EventType::KEY_RELEASED_EVENT: return "KEY_RELEASED_EVENT";
             case EventType::KEY_CHAR_EVENT: return "KEY_CHAR_EVENT";

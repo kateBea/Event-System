@@ -25,6 +25,7 @@ set(SOURCES
         src/Window.cc
         src/Application.cc
         src/Logger.cc
+        src/EventManager.cc
 )
 
 # Target links

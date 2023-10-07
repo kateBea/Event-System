@@ -5,6 +5,8 @@
 #ifndef EVENT_SYSTEM_APPLICATION_HH
 #define EVENT_SYSTEM_APPLICATION_HH
 
+#include <Window.hh>
+
 namespace Mikoto {
     class Application {
     public:
@@ -19,6 +21,13 @@ namespace Mikoto {
         };
 
     private:
+        // UUID
+        UInt64_T uuid{ 54 };
+
+        // Main application window
+        std::unique_ptr<Window> m_Window{};
+
+        // Represents application current state
         State m_State{ State::RUNNING };
     };
 }

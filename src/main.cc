@@ -1,6 +1,7 @@
 #include <memory>
 #include <stdexcept>
 
+#include <Logger.hh>
 #include <Application.hh>
 
 int main() {
@@ -12,7 +13,8 @@ int main() {
         app->Shutdown();
     }
     catch (const std::exception& exception) {
-
+        using namespace Mikoto;
+        MKT_APP_LOGGER_ERROR("Exception. what(): {}", exception.what());
     }
 
     return 0;

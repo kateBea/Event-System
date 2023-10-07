@@ -2,7 +2,7 @@
 Some event queue implementation. Captures events from a window and sends them to an app.
 
 # Screenshots
-
+![KeyTrack](img/keyTrack.png)
 # Building
 
 The requirements are:

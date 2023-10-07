@@ -32,7 +32,7 @@ namespace Mikoto {
          * Only specializations may create KeyEvents
          * */
         KeyEvent(EventType type, Int32_T keyCode)
-            :   Event{ type, static_cast<EventCategory>(INPUT_EVENT_CATEGORY | KEY_EVENT_CATEGORY) }, m_KeyCode{ keyCode }
+            :   Event{ type, GetCategoryFromType(type) }, m_KeyCode{ keyCode }
         {}
 
         Int32_T m_KeyCode{};
@@ -41,7 +41,7 @@ namespace Mikoto {
     class KeyPressedEvent : public KeyEvent {
     public:
         KeyPressedEvent(Int32_T keyCode, bool repeated, Int32_T modifiers = 0)
-            :   KeyEvent{ EventType::KEY_PRESSED_EVENT, keyCode }, m_Repeated{ repeated }, m_Modifiers{ modifiers }
+            :   KeyEvent{ GetStaticType(), keyCode }, m_Repeated{ repeated }, m_Modifiers{ modifiers }
         {}
 
         MKT_NODISCARD auto IsRepeated() const -> bool { return m_Repeated; }
@@ -68,7 +68,7 @@ namespace Mikoto {
     class KeyReleasedEvent : public KeyEvent {
     public:
         explicit KeyReleasedEvent(Int32_T code)
-            :   KeyEvent{ EventType::KEY_RELEASED_EVENT, code }
+            :   KeyEvent{ GetStaticType(), code }
         {}
 
         MKT_NODISCARD auto GetType() const -> EventType override { return GetStaticType(); }
@@ -89,7 +89,7 @@ namespace Mikoto {
     class KeyCharEvent : public Event {
     public:
         explicit KeyCharEvent(UInt32_T charCode)
-            :   Event{ EventType::KEY_CHAR_EVENT, static_cast<EventCategory>(INPUT_EVENT_CATEGORY | KEY_EVENT_CATEGORY) }
+            :   Event{ GetStaticType(), GetCategoryFromType(GetStaticType()) }
             ,   m_KeyChar{ charCode }
         {}
 
