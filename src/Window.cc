@@ -5,13 +5,8 @@
 #include <GLFW/glfw3.h>
 
 #include <Logger.hh>
-
-#include <AppEvents.hh>
-#include <KeyEvents.hh>
-#include <MouseEvents.hh>
-
+#include <CoreEvents.hh>
 #include <EventManager.hh>
-
 #include <Window.hh>
 
 namespace Mikoto {
@@ -28,7 +23,12 @@ namespace Mikoto {
         InitGLFW();
 
         // Allow resizing
-        if (IsResizable()) { glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); }
+        if (IsResizable()) {
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        }
+        else {
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        }
 
         GLFWWindowCreateSpec param{};
         param.Width = GetWidth();

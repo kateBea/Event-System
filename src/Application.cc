@@ -6,12 +6,9 @@
 #include <thread>
 
 #include <Common.hh>
-
 #include <Logger.hh>
-
 #include <Event.hh>
-#include <KeyEvents.hh>
-#include <MouseEvents.hh>
+#include <CoreEvents.hh>
 #include <EventManager.hh>
 #include <Application.hh>
 
@@ -24,28 +21,28 @@ namespace Mikoto {
             [this](Event&) -> bool
             {
                 m_State = State::STOPPED;
-                MKT_CORE_LOGGER_INFO("Received Event close");
+                MKT_CORE_LOGGER_WARN("Received Event close");
                 return false;
             });
 
         EventManager::Subscribe(uuid,
             EventType::KEY_PRESSED_EVENT,
-            [this](Event& event) -> bool
+            [](Event& event) -> bool
             {
-                MKT_CORE_LOGGER_INFO("Pressed Key {}", static_cast<KeyPressedEvent&>(event).GetKeyCode());
+                MKT_APP_LOGGER_DEBUG("Pressed Key {}", static_cast<KeyPressedEvent&>(event).GetKeyCode());
                 return false;
             });
 
         EventManager::Subscribe(uuid,
             EventType::MOUSE_MOVED_EVENT,
-            [this](Event& event) -> bool
+            [](Event& event) -> bool
             {
-                MKT_CORE_LOGGER_INFO("Mouse position Key [{},{}]", static_cast<MouseMovedEvent&>(event).GetPositionX(),
+                MKT_APP_LOGGER_DEBUG("Mouse position Key [{},{}]", static_cast<MouseMovedEvent&>(event).GetPositionX(),
                                      static_cast<MouseMovedEvent&>(event).GetPositionY());
                 return false;
             });
 
-        WindowSpec spec{ 640, 480, "EventSystem", true };
+        WindowSpec spec{ 640, 480, "EventSystem", false };
         m_Window = std::make_unique<Window>(std::move(spec));
     }
 
